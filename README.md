@@ -1,4 +1,5 @@
-﻿Small addon that adds note taking abilities to notes
+﻿
+Small addon that adds note taking abilities to Blender
 
 ## Features 
 
@@ -12,6 +13,9 @@
 
 ## Roadmap
 
+Tested on Blender 3.0, but older versions should work fine.
+
 Please use [Issues](https://github.com/Mateusz-Grzelinski/kuba-notes/issues) for new requests.
 
-- [ ]
+- [ ] Add arrows quickly
+- [ ] Open file explorer (quickly as button)

@@ -15,7 +15,7 @@ bl_info = {
     "name": "KubaNotes",
     "author": "Mateusz Grzeliński",
     "description": "",
-    "blender": (3, 00, 0),
+    "blender": (2, 90, 0),
     "version": (0, 0, 1),
     "location": "Empty object (image) -> Properties -> Object Data Properties",
     "warning": "",
@@ -29,24 +29,16 @@ from bpy.types import Operator, Object, Panel
 from mathutils import Vector
 
 
-class DataButtonsPanel:
+class KUBA_NOTES_PT_notes(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "data"
-
-    @classmethod
-    def poll(cls, context):
-        ob = context.object
-        return ob and ob.type == "EMPTY"
-
-
-class KUBA_NOTES_PT_notes(DataButtonsPanel, Panel):
     bl_label = "Kuba notes"
 
     @classmethod
     def poll(cls, context):
         ob = context.object
-        return ob and ob.type == "EMPTY" and ob.empty_display_type == "IMAGE"
+        return ob
 
     def draw(self, context):
         layout = self.layout
