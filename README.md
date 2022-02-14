@@ -12,4 +12,6 @@
 
 ## Roadmap
 
+Please use [Issues](https://github.com/Mateusz-Grzelinski/kuba-notes/issues) for new requests.
+
 - [ ]
