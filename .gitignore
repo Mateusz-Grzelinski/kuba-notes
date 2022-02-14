@@ -1,1 +1,6 @@
 ﻿.venv
+blender-3.0
+.vscode
+.idea
+*.pyc
+__pycache__
