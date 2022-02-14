@@ -17,7 +17,7 @@ bl_info = {
     "description": "",
     "blender": (3, 00, 0),
     "version": (0, 0, 1),
-    "location": "",
+    "location": "Empty object (image) -> Properties -> Object Data Properties",
     "warning": "",
     "category": "user",
 }
