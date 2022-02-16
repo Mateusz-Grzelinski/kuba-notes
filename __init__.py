@@ -17,7 +17,7 @@ bl_info = {
     "description": "",
     "blender": (2, 80, 0),
     "version": (0, 0, 1),
-    "location": "Empty object (image) -> Properties -> Object Data Properties",
+    "location": "Object -> Properties -> Object Data Properties",
     "warning": "",
     "category": "user",
 }
@@ -25,7 +25,6 @@ bl_info = {
 
 import bpy
 from bpy.types import Operator, Object, Panel
-from mathutils import Vector
 
 
 class KUBA_NOTES_PT_notes(Panel):
