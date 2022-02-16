@@ -15,7 +15,7 @@ bl_info = {
     "name": "KubaNotes",
     "author": "Mateusz Grzeliński",
     "description": "",
-    "blender": (2, 90, 0),
+    "blender": (2, 80, 0),
     "version": (0, 0, 1),
     "location": "Empty object (image) -> Properties -> Object Data Properties",
     "warning": "",
@@ -23,7 +23,6 @@ bl_info = {
 }
 
 
-from cProfile import label
 import bpy
 from bpy.types import Operator, Object, Panel
 from mathutils import Vector
@@ -43,13 +42,9 @@ class KUBA_NOTES_PT_notes(Panel):
     def draw(self, context):
         layout = self.layout
         ob = context.object
-        # layout.template_ID(ob, "data", open="image.open", unlink="object.unlink_data")
-        # layout.separator()
-        # layout.template_image(ob, "data", ob.image_user, compact=True)
 
-        row = layout.row()
+        row = layout.row(align=True)
         row.prop(ob, "www", text="")
-        # bpy.ops.wm.url_open(url="https://github.com/Yeetus3141/ImagePaste#readme")
         row.operator(
             "wm.url_open",
             text="",

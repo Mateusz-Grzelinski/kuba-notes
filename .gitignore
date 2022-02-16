@@ -4,3 +4,5 @@ blender-3.0
 .idea
 *.pyc
 __pycache__
+.png
+.xcf
