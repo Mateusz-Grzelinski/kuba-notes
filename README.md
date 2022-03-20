@@ -17,5 +17,5 @@ Tested on Blender 3.0, but older versions should work fine.
 
 Please use [Issues](https://github.com/Mateusz-Grzelinski/kuba-notes/issues) for new requests.
 
-- [ ] Add arrows quickly
+- [ ] Add arrows quickly - proove of concept done - operator `object.addarrow`
 - [x] Open file explorer (quickly as button)
