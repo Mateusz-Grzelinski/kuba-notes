@@ -17,5 +17,15 @@ Tested on Blender 3.0, but older versions should work fine.
 
 Please use [Issues](https://github.com/Mateusz-Grzelinski/kuba-notes/issues) for new requests.
 
-- [ ] Add arrows quickly - proove of concept done - operator `object.addarrow`
+- [ ] Add arrows quickly 
+  - [x] proof of concept done - operator `object.addarrow`
+  - [ ] import node tree only once per blend file (or just use link?)
+  - [ ] make use of selected and active items: add arrows from each selected to active object 
+  - [ ] quickly add routing points from object mode
+  - [ ] manage style (settings) of multiple arrows at once
+  - [ ] style presets
+  - [ ] automatically scale arrow (driver?) but allow for adding more offset manually
+  - [ ] point to a group of objects 
+  - [ ] point to image as plane with correct scale (image is an empty object)
+  - [ ] lock arrow to a side of object (similar to draw.io)
 - [x] Open file explorer (quickly as button)
