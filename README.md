@@ -17,6 +17,10 @@ Tested on Blender 3.0, but older versions should work fine.
 
 Please use [Issues](https://github.com/Mateusz-Grzelinski/kuba-notes/issues) for new requests.
 
+- [ ] show "Go to" button on object hover
+  - [x] basic implmentation
+- [ ] ctrl click to add new text object 
+  - [ ] if object is selected make an arrow that points to text
 - [ ] Add arrows quickly 
   - [x] proof of concept done - operator `object.addarrow`
   - [ ] import node tree only once per blend file (or just use link?)
@@ -27,5 +31,5 @@ Please use [Issues](https://github.com/Mateusz-Grzelinski/kuba-notes/issues) for
   - [ ] automatically scale arrow (driver?) but allow for adding more offset manually
   - [ ] point to a group of objects 
   - [ ] point to image as plane with correct scale (image is an empty object)
-  - [ ] lock arrow to a side of object (similar to draw.io)
+  - [ ] lock arrow to a side of object (similar to draw.io). Propertly track object boundaries.
 - [x] Open file explorer (quickly as button)

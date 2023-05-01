@@ -23,12 +23,15 @@ bl_info = {
 }
 
 
-import bpy
-from bpy.types import Operator, Object, Panel
 import os
+import bpy
+from bpy.types import Operator, Object, Panel, Context
+from . import bl_ui_widgets
+from . import drag_panel_op
+from . import raycast_op
 
 
-class AddArrowOperator(bpy.types.Operator):
+class AddArrowOperator(Operator):
     bl_idname = "object.addarrow"
     bl_label = "Add parametric arrow to selected"
 
@@ -38,8 +41,13 @@ class AddArrowOperator(bpy.types.Operator):
     ARROW_OBJECT_NAME = "Arrow"
     ARROW_NODE_TREE = "Complex arrow for curve"
 
+    # @classmethod
+    # def poll(cls, context: Context):
+    #     if len(context.selected_objects) <= 1:
+    #         return {"CANCELLED"}
+
     def execute(self, context):
-        if len(context.selected_objects) < 1:
+        if len(context.selected_objects) <= 1:
             self.report({"ERROR"}, "Select 2 or more object")
             return {"CANCELLED"}
         target_object = context.active_object
@@ -105,8 +113,8 @@ class AddArrowOperator(bpy.types.Operator):
         geom_nodes_mod.node_group = arrow_node_group
 
         # gues initial offset values
-        geom_nodes_mod['Input_9'] = source_object.dimensions[0]/2
-        geom_nodes_mod['Input_10'] = target_object.dimensions[0]/2
+        geom_nodes_mod["Input_9"] = source_object.dimensions[0] / 2
+        geom_nodes_mod["Input_10"] = target_object.dimensions[0] / 2
 
         # Source offset
         # bpy.data.objects["Arrow"].modifiers["GeometryNodes"]["Input_9"]
@@ -130,13 +138,23 @@ class KUBA_NOTES_PT_notes(Panel):
         layout = self.layout
         ob = context.object
 
-        row = layout.row(align=True)
-        row.prop(ob, "www", text="")
-        row.operator(
-            "wm.url_open",
-            text="",
-            icon="URL",
-        ).url = ob.www
+        layout.label(text="Links:")
+        draw_kuba_note_menu(layout, ob)
+        layout.label(text="Arrows:")
+        layout.operator("object.addarrow")
+
+
+def draw_kuba_note_menu(layout: bpy.types.UILayout, ob):
+    row = layout.row(align=True)
+    col = row.column(align=True)
+    col.operator(
+        "wm.url_open",
+        text="",
+        icon="URL",
+    ).url = ob.www
+    col.enabled = ob.www != ""
+    col = row.column(align=True)
+    col.prop(ob, "www", text="")
 
 
 class KUBA_NOTES_PT_arrow(Panel):
@@ -150,9 +168,7 @@ class KUBA_NOTES_PT_arrow(Panel):
         ob = context.object
         return ob
 
-    def draw(self, context):
-        layout = self.layout
-        layout.operator("object.addarrow")
+    draw = KUBA_NOTES_PT_notes.draw
 
 
 classes = (
@@ -160,6 +176,11 @@ classes = (
     KUBA_NOTES_PT_arrow,
     AddArrowOperator,
 )
+
+
+def draw_note_button(self: bpy.types.VIEW3D_HT_header, context: bpy.types.Context):
+    layout: bpy.types.UILayout = self.layout
+    draw_kuba_note_menu(layout=layout, ob=context.active_object)
 
 
 def register():
@@ -170,11 +191,21 @@ def register():
     )
     for cls in classes:
         register_class(cls)
+    bpy.types.VIEW3D_HT_header.append(draw_func=draw_note_button)
+
+    bl_ui_widgets.register()
+    drag_panel_op.register()
+    raycast_op.register()
 
 
 def unregister():
     from bpy.utils import unregister_class
 
-    del Object.www
+    bl_ui_widgets.unregister()
+
     for cls in reversed(classes):
         unregister_class(cls)
+    bpy.types.VIEW3D_HT_header.remove(draw_func=draw_note_button)
+
+    drag_panel_op.unregister()
+    raycast_op.unregister()
