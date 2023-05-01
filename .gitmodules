@@ -1,0 +1,2 @@
+[submodule ".\\bl_ui_widgets\\"]
+	url = https://github.com/jayanam/bl_ui_widgets.git
