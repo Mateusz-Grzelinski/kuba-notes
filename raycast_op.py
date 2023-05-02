@@ -99,7 +99,11 @@ class ViewOperatorRayCast(bpy.types.Operator):
         running_op = ViewOperatorRayCast.is_running(context.scene)
         if running_op and self.finish:
             self._finish = True
-            running_op._finish = True
+            try:
+                running_op._finish = True
+            except ReferenceError:
+                del ViewOperatorRayCast._instances[context.scene.name]
+                pass
             return {"FINISHED"}
         self.last_object_name = None
         if context.space_data.type == "VIEW_3D":

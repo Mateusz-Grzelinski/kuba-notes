@@ -16,7 +16,7 @@ bl_info = {
     "author": "Mateusz Grzeliński",
     "description": "",
     "blender": (3, 0, 0),
-    "version": (0, 2, 2),
+    "version": (0, 3, 0),
     "location": "Object -> Properties -> Object Data Properties",
     "warning": "",
     "category": "user",

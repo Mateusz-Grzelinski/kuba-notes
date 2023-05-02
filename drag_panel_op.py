@@ -1,3 +1,4 @@
+import functools
 import bpy
 
 from bpy.types import Operator
@@ -11,7 +12,26 @@ from .bl_ui_widgets.bl_ui_up_down import *
 from .bl_ui_widgets.bl_ui_drag_panel import *
 from .bl_ui_widgets.bl_ui_draw_op import *
 
-called = {}
+
+def get_targets(source_obj_name: str) -> bpy.types.Object:
+    for ob in bpy.data.objects:
+        ob: bpy.types.Object
+        if "arrow" not in ob.name.lower():
+            continue
+        arrow_has_source_in_source_obj = any(
+            mod
+            for mod in ob.modifiers
+            if mod.type == "HOOK" and mod.name == "Hook source" and mod.object.name == source_obj_name
+        )
+        if not arrow_has_source_in_source_obj:
+            continue
+        for mod in ob.modifiers:
+            mod: bpy.types.Modifier
+            if mod.type == "HOOK" and mod.name == "Hook target":
+                yield mod.object
+    return []
+    # if mod.type != "HOOK" and mod.name == "Hook target":
+    #     continue
 
 
 class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
@@ -58,6 +78,20 @@ class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
         # todo check if it is safe:
         self.ob = None
 
+    def _generate_link_buttons(self, source_ob: bpy.types.Object):
+        # self.link_buttons.clear()
+        for i, target_ob in enumerate(get_targets(source_ob.name)):
+            but = BL_UI_Button(x=50, y=50 + i * 40, width=200, height=30)
+            but.bg_color = (0.4, 0.4, 0.4, 0.8)
+            but.hover_bg_color = (0.7, 0.7, 0.7, 1.0)
+            but.text = target_ob.name
+            but.set_mouse_down(
+                functools.partial(
+                    self.button_frame_selected, target_object=target_ob.name
+                )
+            )
+            self.link_buttons.append(but)
+
     def on_invoke(self, context: bpy.types.Context, event: bpy.types.Event):
         # Add new widgets here (TODO: perhaps a better, more automated solution?)
         if self.object_name:
@@ -69,9 +103,12 @@ class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
         self.button1.hover_bg_color = (
             self.hover_bg_color_brighter if ob.www else self.button1.bg_color
         )
-        self.extract_button_text()
+        self.extract_and_set_button1_text()
 
-        widgets_panel = [self.button1]
+        self.link_buttons = []
+        self._generate_link_buttons(ob)
+
+        widgets_panel = [self.button1, *self.link_buttons]
         widgets = [self.panel, *widgets_panel]
 
         self.init_widgets(context, widgets)
@@ -82,11 +119,11 @@ class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
         # can be either on cursor location
         # self.panel.set_location(event.mouse_x, context.area.height - event.mouse_y + 20)
         # or pinned to 3d point
-        
+
         region = context.region
         rv3d = context.region_data
         x, y = view3d_utils.location_3d_to_region_2d(region, rv3d, ob.location)
-        self.panel.set_location(x=x-self.width/2, y=context.area.height - y)
+        self.panel.set_location(x=x - self.width / 2, y=context.area.height - y)
 
     def modal(self, context, event):
         # not ideal, but quick to implement:
@@ -94,11 +131,11 @@ class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
             region = context.region
             rv3d = context.region_data
             x, y = view3d_utils.location_3d_to_region_2d(region, rv3d, self.ob.location)
-            self.panel.set_location(x=x-self.width/2, y=context.area.height - y)
-            self.extract_button_text()
+            self.panel.set_location(x=x - self.width / 2, y=context.area.height - y)
+            self.extract_and_set_button1_text()
         return super().modal(context, event)
 
-    def extract_button_text(self):
+    def extract_and_set_button1_text(self):
         link_desc = self.ob.link_description
         if link_desc:
             appendix = "" if len(link_desc) < 15 else "..."
@@ -111,6 +148,16 @@ class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
     def button1_press(self, widget):
         if self.ob.www:
             bpy.ops.wm.url_open("INVOKE_DEFAULT", url=self.ob.www)
+        # print("Button '{0}' is pressed".format(widget.text))
+
+    def button_frame_selected(self, widget: BL_UI_Widget, target_object: str):
+        # todo ugly: overriding selected object does not want to work
+        for ob in bpy.data.objects:
+            ob.select_set(False)
+        bpy.data.objects[target_object].select_set(True)
+        # with bpy.context.temp_override(selected_objects=target_object):
+        bpy.ops.view3d.view_selected()
+        # bpy.ops.view3d.view_selected({"selected_objects": [target_object]})
         # print("Button '{0}' is pressed".format(widget.text))
 
     def on_finish(self, context):
