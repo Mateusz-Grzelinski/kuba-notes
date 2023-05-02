@@ -48,7 +48,7 @@ class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
 
         self.button1 = BL_UI_Button(20, 10, 260, 30)
         self.button1.bg_color = (0.6, 0.6, 0.6, 0.8)
-        self.hover_bg_color_backup = (0.7, 0.7, 0.7, 1.0)
+        self.hover_bg_color_brighter = (0.7, 0.7, 0.7, 1.0)
         # self.button1.text = "Go to url"
         # self.button1.set_image("//img/scale_24.png")
         # self.button1.set_image_size((24,24))
@@ -67,7 +67,7 @@ class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
         KUBA_OT_draw_operator._instances[(hash(context.area), ob.name)] = self
         self.ob = ob
         self.button1.hover_bg_color = (
-            self.hover_bg_color_backup if not ob.www else self.button1.bg_color
+            self.hover_bg_color_brighter if ob.www else self.button1.bg_color
         )
         self.extract_button_text()
 

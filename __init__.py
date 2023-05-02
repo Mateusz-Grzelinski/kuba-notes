@@ -16,7 +16,7 @@ bl_info = {
     "author": "Mateusz Grzeliński",
     "description": "",
     "blender": (3, 0, 0),
-    "version": (0, 2, 0),
+    "version": (0, 2, 1),
     "location": "Object -> Properties -> Object Data Properties",
     "warning": "",
     "category": "user",
@@ -145,7 +145,13 @@ class KUBA_NOTES_PT_notes(Panel):
         layout.label(text="Arrows:")
         layout.operator(AddArrowOperator.bl_idname)
         from .raycast_op import ViewOperatorRayCast
-        layout.operator(ViewOperatorRayCast.bl_idname)
+        op = ViewOperatorRayCast.is_running(context.scene)
+        if op:
+            op = layout.operator(ViewOperatorRayCast.bl_idname, icon="PAUSE")
+            op.finish = True
+        else:
+            op = layout.operator(ViewOperatorRayCast.bl_idname, icon="PLAY")
+            op.finish = False
 
 
 def draw_kuba_note_menu(layout: bpy.types.UILayout, ob):
