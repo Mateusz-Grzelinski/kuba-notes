@@ -141,7 +141,9 @@ class KUBA_NOTES_PT_notes(Panel):
         layout.label(text="Links:")
         draw_kuba_note_menu(layout, ob)
         layout.label(text="Arrows:")
-        layout.operator("object.addarrow")
+        layout.operator(AddArrowOperator.bl_idname)
+        from .raycast_op import ViewOperatorRayCast
+        layout.operator(ViewOperatorRayCast.bl_idname)
 
 
 def draw_kuba_note_menu(layout: bpy.types.UILayout, ob):

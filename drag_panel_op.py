@@ -22,6 +22,7 @@ class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
     object_name: bpy.props.StringProperty(name="object_name")
 
     _instances = dict()
+    width = 300
 
     @classmethod
     def is_running(
@@ -37,7 +38,7 @@ class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
     def __init__(self):
         super().__init__()
 
-        self.panel = BL_UI_Drag_Panel(x=100, y=50, width=300, height=50)
+        self.panel = BL_UI_Drag_Panel(x=00, y=50, width=self.width, height=50)
         self.panel.bg_color = (0.2, 0.2, 0.2, 0.7)
 
         # self.label = BL_UI_Label(20, 10, 100, 15)
@@ -46,8 +47,8 @@ class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
         # self.label.text_color = (0.2, 0.9, 0.9, 1.0)
 
         self.button1 = BL_UI_Button(20, 10, 260, 30)
-        self.button1.bg_color = (0.1, 0.6, 0.6, 0.8)
-        self.hover_bg_color_backup = (0.1, 0.7, 0.7, 1.0)
+        self.button1.bg_color = (0.6, 0.6, 0.6, 0.8)
+        self.hover_bg_color_backup = (0.7, 0.7, 0.7, 1.0)
         self.button1.text = "Go to url"
         # self.button1.set_image("//img/scale_24.png")
         # self.button1.set_image_size((24,24))
@@ -86,7 +87,7 @@ class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
         region = context.region
         rv3d = context.region_data
         x, y = view3d_utils.location_3d_to_region_2d(region, rv3d, ob.location)
-        self.panel.set_location(x=x, y=context.area.height - y)
+        self.panel.set_location(x=x-self.width/2, y=context.area.height - y)
 
     def modal(self, context, event):
         # not ideal, but quick to implement:
@@ -94,7 +95,7 @@ class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
             region = context.region
             rv3d = context.region_data
             x, y = view3d_utils.location_3d_to_region_2d(region, rv3d, self.ob.location)
-            self.panel.set_location(x=x, y=context.area.height - y)
+            self.panel.set_location(x=x-self.width/2, y=context.area.height - y)
             appendix = "" if len(self.ob.www) < 15 else "..."
             self.button1.text = f"Go to: {self.ob.www[:10]}" + appendix
         return super().modal(context, event)

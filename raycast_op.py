@@ -80,7 +80,8 @@ class ViewOperatorRayCast(bpy.types.Operator):
         # elif event.type == 'LEFTMOUSE':
         elif event.type == "MOUSEMOVE":
             obj: bpy.types.Object = main(context, event)
-            self._on_hover_object_change(context, event, obj)
+            if (obj is not None and obj.name != self.last_object_name) or (obj is None and self.last_object_name is not None):
+                self._on_hover_object_change(context, event, obj)
             self.last_object_name = obj.name if obj else None
             # return {'RUNNING_MODAL'}
         elif event.type in {"RIGHTMOUSE", "ESC"}:
@@ -89,7 +90,15 @@ class ViewOperatorRayCast(bpy.types.Operator):
         return {"PASS_THROUGH"}
 
     def _on_hover_object_change(self, context, event, obj):
+        print(f"Last: {self.last_object_name}, now: {obj}")
+        # close panel on hover ended
+        if op := drag_panel_op.KUBA_OT_draw_operator.is_running(
+                context=context, obj_name=self.last_object_name
+            ):
+            op.finish()
+            
         if obj and self.last_object_name != obj.name:
+            op: drag_panel_op.KUBA_OT_draw_operator
             if not (
                 op := drag_panel_op.KUBA_OT_draw_operator.is_running(
                     context=context, obj_name=obj.name
