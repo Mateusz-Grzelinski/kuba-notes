@@ -49,7 +49,7 @@ class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
         self.button1 = BL_UI_Button(20, 10, 260, 30)
         self.button1.bg_color = (0.6, 0.6, 0.6, 0.8)
         self.hover_bg_color_backup = (0.7, 0.7, 0.7, 1.0)
-        self.button1.text = "Go to url"
+        # self.button1.text = "Go to url"
         # self.button1.set_image("//img/scale_24.png")
         # self.button1.set_image_size((24,24))
         self.button1.set_image_position((4, 2))
@@ -69,8 +69,7 @@ class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
         self.button1.hover_bg_color = (
             self.hover_bg_color_backup if not ob.www else self.button1.bg_color
         )
-        appendix = "" if len(ob.www) < 15 else "..."
-        self.button1.text = f"Go to: {ob.www[:10]}" + appendix
+        self.extract_button_text()
 
         widgets_panel = [self.button1]
         widgets = [self.panel, *widgets_panel]
@@ -96,15 +95,23 @@ class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
             rv3d = context.region_data
             x, y = view3d_utils.location_3d_to_region_2d(region, rv3d, self.ob.location)
             self.panel.set_location(x=x-self.width/2, y=context.area.height - y)
-            appendix = "" if len(self.ob.www) < 15 else "..."
-            self.button1.text = f"Go to: {self.ob.www[:10]}" + appendix
+            self.extract_button_text()
         return super().modal(context, event)
+
+    def extract_button_text(self):
+        link_desc = self.ob.link_description
+        if link_desc:
+            appendix = "" if len(link_desc) < 15 else "..."
+            self.button1.text = f"Go to: {link_desc[:15]}" + appendix
+        else:
+            appendix = "" if len(self.ob.www) < 15 else "..."
+            self.button1.text = f"Go to: {self.ob.www[:15]}" + appendix
 
     # Button press handlers
     def button1_press(self, widget):
         if self.ob.www:
             bpy.ops.wm.url_open("INVOKE_DEFAULT", url=self.ob.www)
-        print("Button '{0}' is pressed".format(widget.text))
+        # print("Button '{0}' is pressed".format(widget.text))
 
     def on_finish(self, context):
         del KUBA_OT_draw_operator._instances[(hash(context.area), self.ob.name)]

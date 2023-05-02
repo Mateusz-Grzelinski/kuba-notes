@@ -138,6 +138,8 @@ class KUBA_NOTES_PT_notes(Panel):
         layout = self.layout
         ob = context.object
 
+        layout.label(text="Link description:")
+        layout.prop(ob, "link_description", text="")
         layout.label(text="Links:")
         draw_kuba_note_menu(layout, ob)
         layout.label(text="Arrows:")
@@ -188,6 +190,9 @@ def draw_note_button(self: bpy.types.VIEW3D_HT_header, context: bpy.types.Contex
 def register():
     from bpy.utils import register_class
 
+    Object.link_description = bpy.props.StringProperty(
+        name="link_description", description="Description of www link"
+    )
     Object.www = bpy.props.StringProperty(
         name="link", description="www link for the purpose of documentation"
     )
@@ -204,6 +209,9 @@ def unregister():
     from bpy.utils import unregister_class
 
     bl_ui_widgets.unregister()
+
+    del Object.www
+    del Object.link_description
 
     for cls in reversed(classes):
         unregister_class(cls)

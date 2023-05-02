@@ -90,7 +90,7 @@ class ViewOperatorRayCast(bpy.types.Operator):
         return {"PASS_THROUGH"}
 
     def _on_hover_object_change(self, context, event, obj):
-        print(f"Last: {self.last_object_name}, now: {obj}")
+        # print(f"Last: {self.last_object_name}, now: {obj}")
         # close panel on hover ended
         if op := drag_panel_op.KUBA_OT_draw_operator.is_running(
                 context=context, obj_name=self.last_object_name
