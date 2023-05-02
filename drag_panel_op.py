@@ -1,6 +1,7 @@
 import bpy
 
 from bpy.types import Operator
+from bpy_extras import view3d_utils
 
 from .bl_ui_widgets.bl_ui_label import *
 from .bl_ui_widgets.bl_ui_button import *
@@ -15,8 +16,7 @@ called = {}
 
 class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
     bl_idname = "object.kuba_draw"
-    bl_label = "bl ui widgets custom operator"
-    bl_description = "Kuba notes button"
+    bl_label = "Kuba notes button"
     bl_options = {"REGISTER"}
 
     object_name: bpy.props.StringProperty(name="object_name")
@@ -68,7 +68,7 @@ class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
         self.button1.hover_bg_color = (
             self.hover_bg_color_backup if not ob.www else self.button1.bg_color
         )
-        appendix = "" if len(ob.www) < 10 else "..."
+        appendix = "" if len(ob.www) < 15 else "..."
         self.button1.text = f"Go to: {ob.www[:10]}" + appendix
 
         widgets_panel = [self.button1]
@@ -79,12 +79,30 @@ class KUBA_OT_draw_operator(BL_UI_OT_draw_operator):
         self.panel.add_widgets(widgets_panel)
 
         # Open the panel at the mouse location
-        self.panel.set_location(event.mouse_x, context.area.height - event.mouse_y + 20)
+        # can be either on cursor location
+        # self.panel.set_location(event.mouse_x, context.area.height - event.mouse_y + 20)
+        # or pinned to 3d point
+        
+        region = context.region
+        rv3d = context.region_data
+        x, y = view3d_utils.location_3d_to_region_2d(region, rv3d, ob.location)
+        self.panel.set_location(x=x, y=context.area.height - y)
+
+    def modal(self, context, event):
+        # not ideal, but quick to implement:
+        if event.type in {"TIMER"} and self.ob:
+            region = context.region
+            rv3d = context.region_data
+            x, y = view3d_utils.location_3d_to_region_2d(region, rv3d, self.ob.location)
+            self.panel.set_location(x=x, y=context.area.height - y)
+            appendix = "" if len(self.ob.www) < 15 else "..."
+            self.button1.text = f"Go to: {self.ob.www[:10]}" + appendix
+        return super().modal(context, event)
 
     # Button press handlers
     def button1_press(self, widget):
         if self.ob.www:
-            bpy.ops.wm.url_open("INVOKE_DEFAULT", url=self.www)
+            bpy.ops.wm.url_open("INVOKE_DEFAULT", url=self.ob.www)
         print("Button '{0}' is pressed".format(widget.text))
 
     def on_finish(self, context):

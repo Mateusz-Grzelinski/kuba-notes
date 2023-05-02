@@ -4,7 +4,7 @@ from bpy_extras import view3d_utils
 from . import drag_panel_op
 
 
-def main(context, event):
+def main(context: bpy.types.Context, event: bpy.types.Event) -> bpy.types.Object:
     """Run this function on left mouse, execute the ray cast"""
     # get the context arguments
     scene = context.scene
@@ -40,7 +40,9 @@ def main(context, event):
         ray_direction_obj = ray_target_obj - ray_origin_obj
 
         # cast the ray
-        success, location, normal, face_index = obj.ray_cast(ray_origin_obj, ray_direction_obj)
+        success, location, normal, face_index = obj.ray_cast(
+            ray_origin_obj, ray_direction_obj
+        )
 
         if success:
             return location, normal, face_index
@@ -52,7 +54,7 @@ def main(context, event):
     best_obj = None
 
     for obj, matrix in visible_objects_and_duplis():
-        if obj.type == 'MESH':
+        if obj.type == "MESH":
             hit, normal, face_index = obj_ray_cast(obj, matrix)
             if hit is not None:
                 hit_world = matrix @ hit
@@ -61,48 +63,57 @@ def main(context, event):
                 if best_obj is None or length_squared < best_length_squared:
                     best_length_squared = length_squared
                     best_obj = obj
-                    
     # print("object chosen!:" + str(best_obj))
     return best_obj
 
+
 class ViewOperatorRayCast(bpy.types.Operator):
     """Modal object selection with a ray cast"""
+
     bl_idname = "kuba.raycast"
     bl_label = "Kuba RayCast"
 
     def modal(self, context, event):
-        if event.type in {'MIDDLEMOUSE', 'WHEELUPMOUSE', 'WHEELDOWNMOUSE'}:
+        if event.type in {"MIDDLEMOUSE", "WHEELUPMOUSE", "WHEELDOWNMOUSE"}:
             # allow navigation
-            return {'PASS_THROUGH'}
+            return {"PASS_THROUGH"}
         # elif event.type == 'LEFTMOUSE':
-        elif event.type == 'MOUSEMOVE':
-            obj:bpy.types.Object = main(context, event)
+        elif event.type == "MOUSEMOVE":
+            obj: bpy.types.Object = main(context, event)
             self._on_hover_object_change(context, event, obj)
             self.last_object_name = obj.name if obj else None
             # return {'RUNNING_MODAL'}
-        elif event.type in {'RIGHTMOUSE', 'ESC'}:
-            return {'CANCELLED'}
+        elif event.type in {"RIGHTMOUSE", "ESC"}:
+            return {"CANCELLED"}
 
-        return {'PASS_THROUGH'}
+        return {"PASS_THROUGH"}
 
     def _on_hover_object_change(self, context, event, obj):
         if obj and self.last_object_name != obj.name:
-            if not (op := drag_panel_op.KUBA_OT_draw_operator.is_running(context=context, obj_name=obj.name)):
+            if not (
+                op := drag_panel_op.KUBA_OT_draw_operator.is_running(
+                    context=context, obj_name=obj.name
+                )
+            ):
                 bpy.ops.object.kuba_draw("INVOKE_DEFAULT", object_name=obj.name)
-            else:
-                op.panel.set_location(event.mouse_x, context.area.height - event.mouse_y + 20)
+            # else:
+            #     op.panel.set_location(
+            #         event.mouse_x, context.area.height - event.mouse_y + 20
+            #     )
 
     def invoke(self, context, event):
         self.last_object_name = None
-        if context.space_data.type == 'VIEW_3D':
+        if context.space_data.type == "VIEW_3D":
             context.window_manager.modal_handler_add(self)
-            return {'RUNNING_MODAL'}
+            return {"RUNNING_MODAL"}
         else:
-            self.report({'WARNING'}, "Active space must be a View3d")
-            return {'CANCELLED'}
-        
+            self.report({"WARNING"}, "Active space must be a View3d")
+            return {"CANCELLED"}
+
+
 def register():
     bpy.utils.register_class(ViewOperatorRayCast)
+
 
 def unregister():
     bpy.utils.unregister_class(ViewOperatorRayCast)
