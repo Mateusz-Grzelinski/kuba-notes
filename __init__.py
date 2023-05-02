@@ -16,7 +16,7 @@ bl_info = {
     "author": "Mateusz Grzeliński",
     "description": "",
     "blender": (3, 0, 0),
-    "version": (0, 2, 1),
+    "version": (0, 2, 2),
     "location": "Object -> Properties -> Object Data Properties",
     "warning": "",
     "category": "user",
@@ -171,7 +171,7 @@ class KUBA_NOTES_PT_arrow(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "Tool"
-    bl_label = "Add Arrow"
+    bl_label = KUBA_NOTES_PT_notes.bl_label
 
     @classmethod
     def poll(cls, context):

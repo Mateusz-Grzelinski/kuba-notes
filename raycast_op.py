@@ -83,6 +83,10 @@ class ViewOperatorRayCast(bpy.types.Operator):
     )
 
     @classmethod
+    def poll(cls, context: bpy.types.Context):
+        return context.area.type == "VIEW_3D"
+
+    @classmethod
     def is_running(cls, scene: bpy.types.Scene) -> "ViewOperatorRayCast":
         return cls._instances.get(scene.name)
 
@@ -107,16 +111,22 @@ class ViewOperatorRayCast(bpy.types.Operator):
             return {"CANCELLED"}
 
     def modal(self, context, event):
-        if self._finish:
+        # context.area can be none if workspace is changed
+        if self._finish or context.area is None:
             del ViewOperatorRayCast._instances[context.scene.name]
-            context.area.tag_redraw()
+            if context.area:
+                context.area.tag_redraw()
             return {"CANCELLED"}
         if event.type in {"MIDDLEMOUSE", "WHEELUPMOUSE", "WHEELDOWNMOUSE"}:
             # allow navigation
             return {"PASS_THROUGH"}
         # elif event.type == 'LEFTMOUSE':
         elif event.type == "MOUSEMOVE":
-            obj: bpy.types.Object = main(context, event)
+            try:
+                obj: bpy.types.Object = main(context, event)
+            except AttributeError:
+                # can occur when changing workspace
+                obj = None
             if (obj is not None and obj.name != self.last_object_name) or (
                 obj is None and self.last_object_name is not None
             ):
