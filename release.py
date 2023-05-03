@@ -11,7 +11,9 @@ logging.basicConfig(level=logging.INFO)
 ACCEPTED_PATTERNS = tuple(
     re.compile(pattern) for pattern in (r".*\.py$", r".*\.blend$", r".*\.md$")
 )
-EXCLUDED_PATTERNS = tuple(re.compile(pattern) for pattern in (r".*/__pycache__/.*", ".*/.vscode/.*"))
+EXCLUDED_PATTERNS = tuple(
+    re.compile(pattern) for pattern in (r".*/__pycache__/.*", ".*/.vscode/.*")
+)
 
 
 TAG = os.getenv("GITHUB_REF")
@@ -19,11 +21,18 @@ if TAG is None or "/" in TAG:
     try:
         from kuba_addon import bl_info
     except ModuleNotFoundError as e:
-        bl_info = e.bl_info 
+        bl_info = e.bl_info
 
     TAG = "v" + ".".join(str(v) for v in bl_info["version"])
 
 if __name__ == "__main__":
+    # old way:
+    # print(f"::set-output name=tag_string::{TAG}")
+
+    # new way:
+    if github := os.environ["GITHUB_OUTPUT"]:
+        with open(github, "a") as fh:
+            print(f"tag_string={TAG}", file=fh)
     with ZipFile(f"kuba-addon-{TAG}.zip", "w") as zipObj:
         for folderName, subfolders, filenames in os.walk("kuba_addon"):
             for filename in filenames:
