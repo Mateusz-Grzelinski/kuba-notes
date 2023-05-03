@@ -3,7 +3,7 @@ on:
     # tags:
     #   - "v*"
     branches:
-      - main
+      - master
     # paths:
     #   - "**.py"
     #   - "**.blend"
