@@ -1,0 +1,29 @@
+on:
+  push: 
+    # tags:
+    #   - "v*"
+    branches:
+      - main
+    # paths:
+    #   - "**.py"
+    #   - "**.blend"
+
+jobs:
+  release:
+    name: "Create blender addon realease when new tag is uploaded on main branch"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Automatic Releases
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: |
+            **.py
+            **.blend
+          
