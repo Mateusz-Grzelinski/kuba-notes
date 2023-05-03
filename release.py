@@ -15,7 +15,7 @@ EXCLUDED_PATTERNS = tuple(re.compile(pattern) for pattern in (r".*/__pycache__/.
 
 
 TAG = os.getenv("GITHUB_REF")
-if TAG is None:
+if TAG is None or "/" in TAG:
     from kuba_addon import bl_info
 
     TAG = "v" + ".".join(str(v) for v in bl_info["version"])
