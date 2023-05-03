@@ -11,7 +11,11 @@ bl_info = {
 
 
 import os
-import bpy
+try:
+    import bpy
+except ModuleNotFoundError as e:
+    e.bl_info = bl_info
+    raise e
 from bpy.types import Operator, Object, Panel, Context
 from . import bl_ui_widgets
 from . import drag_panel_op
