@@ -6,7 +6,7 @@ import re
 import logging
 import pathlib
 
-logging.basicConfig(file=os.getenv("GITHUB_STEP_SUMMARY"), level=logging.INFO)
+logging.basicConfig(filename=os.getenv("GITHUB_STEP_SUMMARY"), level=logging.INFO)
 
 ACCEPTED_PATTERNS = tuple(
     re.compile(pattern) for pattern in (r".*\.py$", r".*\.blend$", r".*\.md$")
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     # print(f"::set-output name=tag_string::{TAG}")
 
     # new way:
-    if github := os.environ["GITHUB_OUTPUT"]:
+    if github := os.getenv("GITHUB_OUTPUT"):
         with open(github, "a") as fh:
             print(f"tag_string={TAG}", file=fh)
     with ZipFile(f"kuba-addon-{TAG}.zip", "w") as zipObj:
