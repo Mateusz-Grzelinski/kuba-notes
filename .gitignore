@@ -6,3 +6,7 @@ blender-3.0
 __pycache__
 .png
 .xcf
+old
+.blend1
+.blend2
+*.zip

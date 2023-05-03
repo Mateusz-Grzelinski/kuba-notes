@@ -19,13 +19,22 @@ jobs:
         with:
           submodules: true
 
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Create release zip
+        env:
+          GITHUB_REF: ${{env.GITHUB_REF}}
+        run: python release.py
+
       - name: Automatic Releases
         uses: marvinpinto/action-automatic-releases@latest
         with:
-          automatic_release_tag: latest
+          automatic_release_tag: ${{env.GITHUB_REF}}
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
           files: |
-            **.py
-            **.blend
+            kuba-addon-*.zip
           
