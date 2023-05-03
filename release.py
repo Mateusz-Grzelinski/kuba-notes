@@ -6,7 +6,7 @@ import re
 import logging
 import pathlib
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(file=os.getenv("GITHUB_STEP_SUMMARY"), level=logging.INFO)
 
 ACCEPTED_PATTERNS = tuple(
     re.compile(pattern) for pattern in (r".*\.py$", r".*\.blend$", r".*\.md$")
