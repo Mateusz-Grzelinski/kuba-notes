@@ -2,8 +2,8 @@ on:
   push: 
     tags:
       - "v*"
-    branches:
-      - master
+    # branches:
+    #   - master
     # paths:
     #   - "**.py"
     #   - "**.blend"
