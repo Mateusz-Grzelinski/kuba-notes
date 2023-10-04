@@ -17,7 +17,7 @@ Tested on Blender 3.0, but older versions should work fine.
 
 Please use [Issues](https://github.com/Mateusz-Grzelinski/kuba-notes/issues) for new requests.
 
-- [ ] add descriptio field
+- [ ] add description field
   - [ ] show on hoover description by default (if missing show partial link)
 - [ ] show "Go to" button on object hover
   - [x] basic implmentation

@@ -8,31 +8,48 @@ import pathlib
 
 logging.basicConfig(filename=os.getenv("GITHUB_STEP_SUMMARY"), level=logging.INFO)
 
-ACCEPTED_PATTERNS = tuple(
-    re.compile(pattern) for pattern in (r".*\.py$", r".*\.blend$", r".*\.md$")
+ACCEPTED_PATTERNS = set(
+    re.compile(pattern)
+    for pattern in (
+        r".*\.py$",
+        r".*\.blend$",
+        r".*\.md$",
+    )
 )
-EXCLUDED_PATTERNS = tuple(
-    re.compile(pattern) for pattern in (r".*/__pycache__/.*", ".*/.vscode/.*")
+EXCLUDED_PATTERNS = set(
+    re.compile(pattern)
+    for pattern in (
+        r".*/__pycache__/.*",
+        ".*/.vscode/.*",
+    )
 )
 
 
-TAG = os.getenv("GITHUB_REF")
-if TAG is None or "/" in TAG:
+def get_version() -> None | str:
     try:
         from kuba_addon import bl_info
     except ModuleNotFoundError as e:
+        # hacky way of getting addon version
         bl_info = e.bl_info
+        tag = "v" + ".".join(str(v) for v in bl_info["version"])
 
-    TAG = "v" + ".".join(str(v) for v in bl_info["version"])
 
-if __name__ == "__main__":
+TAG = get_version()
+
+
+def write_github_output():
     # old way:
     # print(f"::set-output name=tag_string::{TAG}")
 
-    # new way:
-    if github := os.getenv("GITHUB_OUTPUT"):
-        with open(github, "a") as fh:
-            print(f"tag_string={TAG}", file=fh)
+    # new way
+    github_output_file = os.getenv("GITHUB_OUTPUT")
+    if github_output_file is None:
+        return None
+    with open(github_output_file, "a") as fh:
+        print(f"tag_string={TAG}", file=fh)
+
+
+def create_release_zip():
     with ZipFile(f"kuba-addon-{TAG}.zip", "w") as zipObj:
         for folderName, subfolders, filenames in os.walk("kuba_addon"):
             for filename in filenames:
@@ -48,3 +65,8 @@ if __name__ == "__main__":
                 logging.info(f"zipping: {filePath}")
                 # Add file to zip
                 zipObj.write(filePath, filePath)
+
+
+if __name__ == "__main__":
+    create_release_zip()
+    write_github_output()
