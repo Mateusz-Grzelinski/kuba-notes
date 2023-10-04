@@ -32,6 +32,7 @@ def get_version() -> None | str:
         # hacky way of getting addon version
         bl_info = e.bl_info
         tag = "v" + ".".join(str(v) for v in bl_info["version"])
+        return tag
 
 
 TAG = get_version()
