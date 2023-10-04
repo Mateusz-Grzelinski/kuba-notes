@@ -3,7 +3,7 @@ bl_info = {
     "author": "Mateusz Grzeliński",
     "description": "",
     "blender": (3, 0, 0),
-    "version": (0, 3, 0),
+    "version": (0, 4, 0),
     "location": "Object -> Properties -> Object Data Properties",
     "warning": "",
     "category": "user",
@@ -11,6 +11,7 @@ bl_info = {
 
 
 import os
+
 try:
     import bpy
 except ModuleNotFoundError as e:
@@ -20,6 +21,118 @@ from bpy.types import Operator, Object, Panel, Context
 from . import bl_ui_widgets
 from . import drag_panel_op
 from . import raycast_op
+
+
+def walk_backwards(node: bpy.types.Node) -> bpy.types.Node:
+    for output in node.outputs:
+        if not output:
+            return node
+        if output.type != "SHADER":
+            return node
+        for input in node.inputs:
+            input: bpy.types.NodeSocket
+            if input.links:
+                for link in input.links:
+                    link: bpy.types.NodeLink
+                    if link.from_socket.type == "VECTOR":
+                        continue
+                    return walk_backwards(link.from_node)
+
+
+def pick_colored_output(node: bpy.types.Node) -> str:
+    colored_output = [out.name for out in node.outputs if out.type == "RGBA"]
+    if colored_output:
+        return colored_output[0]
+    return node.outputs[0].name
+
+
+class EmitMaterialOperator(Operator):
+    bl_idname = "kuba_notes.emit_material"
+    bl_label = "Make Shadowless"
+    bl_description = "Convert to material that is not affected by shadow"
+
+    reverse: bpy.props.BoolProperty(
+        description="reverse the effect - bring back old material",
+        default=False
+    )
+
+    @classmethod
+    def poll(cls, context):
+        ob = context.object
+        return ob
+
+    def execute(self, context):
+        obj: bpy.types.Object = context.active_object
+
+        if not obj.material_slots:
+            self.report({"ERROR"}, "No material is present")
+            return {"CANCELLED"}
+
+        for material_slot in obj.material_slots:
+            material_slot: bpy.types.MaterialSlot
+            material = material_slot.material
+            if not material.use_nodes:
+                self.report({"ERROR"}, "Not supported: Material does not use nodes")
+                return {"CANCELLED"}
+            node_tree: bpy.types.ShaderNodeTree = material.node_tree
+            links = node_tree.links
+            output_nodes = [
+                node
+                for node in node_tree.nodes
+                if node.type == "OUTPUT_MATERIAL" and node.inputs[0].links
+            ]
+            if len(output_nodes) != 1:
+                self.report(
+                    {"ERROR"},
+                    "Not supported: can not find Output Material node or found multiple",
+                )
+                return {"CANCELLED"}
+            output_node = output_nodes[0]
+
+            if self.reverse:
+                try:
+                    emission: bpy.types.ShaderNodeEmission = node_tree.nodes[
+                        "Added by addon Emission"
+                    ]
+                    # very hacky xd and the logic is not perfect
+                    old_input: bpy.types.Node = node_tree.nodes[emission.label]
+                except KeyError:
+                    return {"CANCELLED"}
+                else:
+                    links.new(old_input.outputs[0], output_node.inputs[0])
+                return {"FINISHED"}
+
+            first_non_shader_node = walk_backwards(
+                output_node.inputs[0].links[0].from_node
+            )
+            output_node_inputs = output_node.inputs[0].links
+            if output_node_inputs:
+                old_node: bpy.types.Node = output_node_inputs[0].from_node
+            try:
+                emission: bpy.types.ShaderNodeEmission = node_tree.nodes["Added by addon Emission"]
+            except KeyError:
+                emission: bpy.types.ShaderNodeEmission = node_tree.nodes.new("ShaderNodeEmission")
+            emission.name = "Added by addon Emission"
+            if not self.reverse:
+                emission.label = old_node.name
+            if first_non_shader_node:
+                links.new(
+                    first_non_shader_node.outputs[
+                        pick_colored_output(first_non_shader_node)
+                    ],
+                    emission.inputs[0],
+                )
+            else:
+                try:
+                    shader_to_rgb: bpy.types.ShaderNodeShaderToRGB = node_tree.nodes["Added by addon Shader To RGB"]
+                except KeyError:
+                    shader_to_rgb: bpy.types.ShaderNodeShaderToRGB = node_tree.nodes.new("ShaderNodeShaderToRGB")
+                shader_to_rgb.name = "Added by addon Shader To RGB"
+                if old_node:
+                    links.new(old_node.outputs[0], shader_to_rgb.inputs[0])
+                links.new(shader_to_rgb.outputs[0], emission.inputs[0])
+            links.new(emission.outputs[0], output_node.inputs[0])
+        return {"FINISHED"}
 
 
 class AddArrowOperator(Operator):
@@ -135,10 +248,16 @@ class KUBA_NOTES_PT_notes(Panel):
         draw_kuba_note_menu(layout, ob)
         layout.label(text="Arrows:")
         layout.operator(AddArrowOperator.bl_idname)
+        row = layout.row(align=True)
+        op = row.operator(EmitMaterialOperator.bl_idname, icon="X", text="")
+        op.reverse = True
+        op = row.operator(EmitMaterialOperator.bl_idname)
+        op.reverse = False
         from .raycast_op import ViewOperatorRayCast
+
         op = ViewOperatorRayCast.is_running(context.scene)
         if op:
-            op = layout.operator(ViewOperatorRayCast.bl_idname, icon="PAUSE")
+            op = layout.operator(ViewOperatorRayCast.bl_idname, icon="PAUSE", text="")
             op.finish = True
         else:
             op = layout.operator(ViewOperatorRayCast.bl_idname, icon="PLAY")
@@ -176,6 +295,7 @@ classes = (
     KUBA_NOTES_PT_notes,
     KUBA_NOTES_PT_arrow,
     AddArrowOperator,
+    EmitMaterialOperator,
 )
 
 
