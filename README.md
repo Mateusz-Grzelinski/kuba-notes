@@ -1,6 +1,8 @@
 ﻿
 [KubaNotes](https://github.com/Mateusz-Grzelinski/kuba-notes) is small addon that adds note taking abilities to Blender
 
+![addon image](images\addon.png)
+
 ## Features 
 
 - open link: type any text and open in preferred application: www link will open web, path will open file explorer
