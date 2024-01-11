@@ -1,7 +1,7 @@
 ﻿
 [KubaNotes](https://github.com/Mateusz-Grzelinski/kuba-notes) is small addon that adds note taking abilities to Blender
 
-![addon image](images\addon.png)
+![addon image](images/addon.png)
 
 ## Features 
 
